@@ -3,7 +3,7 @@
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 
-unsigned int currentMsg;
+unsigned int currentMsg = 0;
 
 client c;
 bool isConnected;
@@ -89,7 +89,6 @@ void SendSwitchScene(std::string sceneName)
 void RunServer(std::string uri)
 {
 	currentUri = uri;
-    currentMsg = 0;
     try {
         // Set logging to be pretty verbose (everything except message payloads)
         c.set_access_channels(websocketpp::log::alevel::all);

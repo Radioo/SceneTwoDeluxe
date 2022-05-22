@@ -19,7 +19,7 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo)
 {
 	CurrentModuleInfo = mInfo;	
 	// IIDX28
-	if (version == "LDJ:J:A:A:2021091500")
+	if (version.substr(10,10) == "2021091500")
 	{
 		std::cout << "Found supported version: " << version << std::endl;
 		ParseJson();
