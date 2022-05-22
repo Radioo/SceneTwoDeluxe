@@ -10,3 +10,6 @@ Edit the `.json` to configure behavior:
   Then input your desired scenes to the fileds below. The first four are the most common ones you'll be using, but I've included the rest that I've discovered while reversing. Leaving them empty will not trigger any scene change.  
 Inject the `.dll` using your preferred toolset.  
 The client will attempt to reconnect if a connection is lost.
+
+# Supported versions
+IIDX28 (2021091500)
