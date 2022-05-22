@@ -16,7 +16,7 @@ const std::vector<BYTE> DateCodeTemplate = { 0x2A, 0x2A, 0x2A, 0x3A, 0x2A, 0x3A,
 static std::regex const re{ R"([\w|\d][\w|\d][\w|\d][:][\w|\d][:][\w|\d][:][\w|\d][:]\d\d\d\d\d\d\d\d\d\d)", std::regex_constants::optimize };
 
 // Names of possible game modules
-const std::vector<LPCWSTR> GameModuleNames = { L"bm2dx.dll", L"bm2dx.exe" };
+const std::vector<LPCWSTR> GameModuleNames = { L"bm2dx.dll", L"bm2dx.exe", L"soundvoltex.dll"};
 
 HMODULE CurrentGameModule = NULL;
 LPCWSTR CurrentGameModuleName = NULL;
@@ -95,11 +95,18 @@ std::string GetGameVersion(LPMODULEINFO mInfo)
 
 		const char* beg = (char*)mInfo->lpBaseOfDll;
 		const char* end = beg + mInfo->SizeOfImage;
-
+		std::cout << "searching" << std::endl;
 		std::cmatch m;
+		/*
 		if (!std::regex_search(beg, end, m, re))
 		{
 			return "NOT FOUND";	
+		}
+		*/
+		while (!std::regex_search(beg, end, m, re))
+		{
+			std::cout << "Could not find version, retrying in 3 seconds..." << std::endl;
+			std::this_thread::sleep_for(std::chrono::seconds(3));
 		}
 		std::cout << "Found version string: " << std::hex << (uintptr_t)m[0].first << std::endl;
 		return m[0].first;

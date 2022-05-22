@@ -8,6 +8,13 @@ bool* isDP;
 nlohmann::json j;
 std::string uri;
 
+char (__fastcall* OnSceneSwitch_origSDVX6)(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5) = nullptr;
+char __fastcall OnSceneSwitch_hookSDVX6(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5)
+{
+	SceneSwitchSDVX6(sceneID);
+	return OnSceneSwitch_origSDVX6(a1, sceneID, a3, a4, a5);
+}
+
 char(__fastcall* OnSceneSwitch_orig28)(void* a1, unsigned int sceneID, __int64 a3) = nullptr;
 char __fastcall OnSceneSwitch_hook28(void* a1, unsigned int sceneID, __int64 a3)
 {
@@ -22,9 +29,16 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo)
 	if (version.substr(10,10) == "2021091500")
 	{
 		std::cout << "Found supported version: " << version << std::endl;
-		ParseJson();
+		ParseJsonIIDX();
 		auto task = std::async(std::launch::async, RunServer, uri);
 		Hook28();
+	}
+	else if (version.substr(10, 10) == "2021121400")
+	{
+		ParseJsonSDVX();
+		auto task = std::async(std::launch::async, RunServer, uri);
+		HookVoltex6();
+		std::cout << "Found supported version: " << version << std::endl;
 	}
 	else
 	{
@@ -32,7 +46,90 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo)
 	}
 }
 
-void ParseJson()
+void ParseJsonSDVX()
+{
+	std::ifstream in("SceneTwoVoltex.json");
+	in >> j;
+	in.close();
+	uri = j["obs-address"];
+	std::cout << "json dump: " << j.dump(4) << std::endl;
+}
+
+void HookVoltex6()
+{
+	uintptr_t sceneSwitchFuncAddr = 0x43B950;
+	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
+
+	MH_CreateHook(
+		reinterpret_cast<void*>(addrAfterOffset),
+		reinterpret_cast<void*>(OnSceneSwitch_hookSDVX6),
+		reinterpret_cast<void**>(&OnSceneSwitch_origSDVX6)
+	);
+	MH_EnableHook(MH_ALL_HOOKS);
+
+	std::cout << "Hooks enabled" << std::endl;
+}
+
+void SceneSwitchSDVX6(unsigned int sceneID)
+{
+	switch (sceneID)
+	{
+	case 0x11:
+	{
+		std::cout << "Music select scene" << std::endl;
+		SendSwitchScene(j["music-select"]);
+		break;
+	}
+	case 0x2B:
+	{
+		std::cout << "Stage scene" << std::endl;
+		SendSwitchScene(j["stage"]);
+		break;
+	}
+	case 0xF:
+	{
+		std::cout << "Result scene" << std::endl;
+		SendSwitchScene(j["result-screen"]);
+		break;
+	}
+	case 0xD:
+	{
+		std::cout << "Attract screen" << std::endl;
+		SendSwitchScene(j["attract-screen"]);
+		break;
+	}
+	case 0xC:
+	{
+		std::cout << "Title screen" << std::endl;
+		SendSwitchScene(j["title-screen"]);
+		break;
+	}
+	case 0x2D:
+	{
+		std::cout << "Test menu" << std::endl;
+		SendSwitchScene(j["test-menu"]);
+		break;
+	}
+	case 0x23:
+	{
+		std::cout << "Course select" << std::endl;
+		SendSwitchScene(j["course-select"]);
+		break;
+	}
+	case 0x10:
+	{
+		std::cout << "Course result" << std::endl;
+		SendSwitchScene(j["course-result"]);
+		break;
+	}
+	default:
+	{
+		std::cout << "SceneID: " << sceneID << std::endl;
+	}
+	}
+}
+
+void ParseJsonIIDX()
 {
 	std::ifstream in("SceneTwoDeluxe.json");
 	in >> j;

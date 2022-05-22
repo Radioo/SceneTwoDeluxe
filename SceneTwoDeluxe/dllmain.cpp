@@ -28,8 +28,16 @@ DWORD WINAPI DecideVersion(LPVOID hModule)
         //std::cout << mInfo->EntryPoint << std::endl;
         //std::cout << mInfo->lpBaseOfDll << std::endl;
         //std::cout << std::hex << mInfo->SizeOfImage << std::endl;
+
         std::string version = GetGameVersion(mInfo);
-        StartSceneHooks(version, mInfo);
+        if (version == "NOT FOUND")
+        {
+			std::cout << "Game version not found, retrying..." << std::endl;
+		}
+		else
+		{
+            StartSceneHooks(version, mInfo);
+        }
     }
     
     return EXIT_SUCCESS;
