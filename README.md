@@ -12,5 +12,5 @@ Inject the `.dll` using your preferred toolset.
 You can see various debug messages in the cmd log if somehing goes wrong (will probably add an option to disable them).  
 The client will attempt to reconnect if a connection is lost.
 
-# Supported versions
+# Supported games
 IIDX28 (2021091500)
