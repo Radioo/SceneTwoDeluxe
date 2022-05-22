@@ -9,6 +9,7 @@ Edit the `.json` to configure behavior:
   Change `"obs-address"` if you are running the game on a separate PC.
   Then input your desired scenes to the fileds below. The first four are the most common ones you'll be using, but I've included the rest that I've discovered while reversing. Leaving them empty will not trigger any scene change.  
 Inject the `.dll` using your preferred toolset.  
+You can see various debug messages in the cmd log if somehing goes wrong (will probably add an option to disable them).  
 The client will attempt to reconnect if a connection is lost.
 
 # Supported versions
