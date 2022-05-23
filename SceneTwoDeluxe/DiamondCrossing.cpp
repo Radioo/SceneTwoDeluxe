@@ -15,6 +15,13 @@ char __fastcall OnSceneSwitch_hookSDVX6(void* a1, unsigned int sceneID, __int64 
 	return OnSceneSwitch_origSDVX6(a1, sceneID, a3, a4, a5);
 }
 
+char (__fastcall* OnSceneSwitch_orig25)(void* a1, unsigned int sceneID, __int64 a3, char a4) = nullptr;
+char __fastcall OnSceneSwitch_hook25(void* a1, unsigned int sceneID, __int64 a3, char a4)
+{
+	SceneSwitch25(sceneID);
+	return OnSceneSwitch_orig25(a1, sceneID, a3, a4);
+}
+
 char(__fastcall* OnSceneSwitch_orig28)(void* a1, unsigned int sceneID, __int64 a3) = nullptr;
 char __fastcall OnSceneSwitch_hook28(void* a1, unsigned int sceneID, __int64 a3)
 {
@@ -33,6 +40,15 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo)
 		auto task = std::async(std::launch::async, RunServer, uri);
 		Hook28();
 	}
+	// IIDX25
+	else if (version.substr(10, 10) == "2018091900")
+	{
+		std::cout << "Found supported version: " << version << std::endl;
+		ParseJsonIIDX();
+		auto task = std::async(std::launch::async, RunServer, uri);
+		Hook25();
+	}
+	// SDVX6
 	else if (version.substr(10, 10) == "2021121400")
 	{
 		ParseJsonSDVX();
@@ -136,6 +152,255 @@ void ParseJsonIIDX()
 	in.close();
 	uri = j["obs-address"];
 	std::cout << "json dump: " << j.dump(4) << std::endl;
+}
+
+void Hook25()
+{
+	uintptr_t isDPAddr = 0x231B6E4;
+	isDP = (bool*)((uintptr_t)CurrentModuleInfo->lpBaseOfDll + isDPAddr);
+
+	uintptr_t sceneSwitchFuncAddr = 0x128D70;
+	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
+
+	std::cout << "addrAfterOffset: " << addrAfterOffset << std::endl;
+
+	MH_CreateHook(
+		reinterpret_cast<void*>(addrAfterOffset),
+		reinterpret_cast<void*>(OnSceneSwitch_hook25),
+		reinterpret_cast<void**>(&OnSceneSwitch_orig25)
+	);
+	MH_EnableHook(MH_ALL_HOOKS);
+
+	std::cout << "Hooks enabled" << std::endl;
+}
+
+void SceneSwitch25(unsigned int sceneID)
+{
+	switch (sceneID)
+	{
+	case 0x14:
+	{
+		std::cout << "Music select" << std::endl;
+		SendSwitchScene(j["music-select"]);
+		break;
+	}
+	case 0x15:
+	{
+		std::cout << "Result" << std::endl;
+		SendSwitchScene(j["result-screen"]);
+		break;
+	}
+	case 0x3D:
+	{
+		if (*isDP)
+		{
+			std::cout << "DP pfree stage" << std::endl;
+			SendSwitchScene(j["dp-stage"]);
+			break;
+		}
+		else
+		{
+			std::cout << "SP pfree stage" << std::endl;
+			SendSwitchScene(j["sp-stage"]);
+			break;
+		}
+	}
+	case 0x37:
+	{
+		if (*isDP)
+		{
+			std::cout << "DP standard stage" << std::endl;
+			SendSwitchScene(j["dp-stage"]);
+			break;
+		}
+		else
+		{
+			std::cout << "SP standard stage" << std::endl;
+			SendSwitchScene(j["sp-stage"]);
+			break;
+		}
+	}
+	case 0x3C:
+	{
+		if (*isDP)
+		{
+			std::cout << "DP step up stage" << std::endl;
+			SendSwitchScene(j["dp-stage"]);
+			break;
+		}
+		else
+		{
+			std::cout << "SP step up stage" << std::endl;
+			SendSwitchScene(j["sp-stage"]);
+			break;
+		}
+	}
+	case 0x34:
+	{
+		if (*isDP)
+		{
+			std::cout << "DP dan stage" << std::endl;
+			SendSwitchScene(j["dp-stage"]);
+			break;
+		}
+		else
+		{
+			std::cout << "SP danstage" << std::endl;
+			SendSwitchScene(j["sp-stage"]);
+			break;
+		}
+	}
+	case 0x35:
+	{
+		if (*isDP)
+		{
+			std::cout << "DP expert stage" << std::endl;
+			SendSwitchScene(j["dp-stage"]);
+			break;
+		}
+		else
+		{
+			std::cout << "SP expert stage" << std::endl;
+			SendSwitchScene(j["sp-stage"]);
+			break;
+		}
+	}
+	case 0x38:
+	{
+		if (*isDP)
+		{
+			std::cout << "DP free stage" << std::endl;
+			SendSwitchScene(j["dp-stage"]);
+			break;
+		}
+		else
+		{
+			std::cout << "SP free stage" << std::endl;
+			SendSwitchScene(j["sp-stage"]);
+			break;
+		}
+	}
+	case 0x3E:
+	{
+		if (*isDP)
+		{
+			std::cout << "DP arena stage" << std::endl;
+			SendSwitchScene(j["dp-scene"]);
+			break;
+		}
+		else
+		{
+			std::cout << "SP arena stage" << std::endl;
+			SendSwitchScene(j["sp-scene"]);
+			break;
+		}
+	}
+	case 0x25:
+	{
+		std::cout << "Arena podium" << std::endl;
+		SendSwitchScene(j["arena-podium"]);
+		break;
+	}
+	case 0x24:
+	{
+		std::cout << "Arena before song" << std::endl;
+		SendSwitchScene(j["arena-before-song"]);
+		break;
+	}
+	case 0x23:
+	{
+		std::cout << "Arena music select" << std::endl;
+		SendSwitchScene(j["music-select"]);
+		break;
+	}
+	case 0x22:
+	{
+		std::cout << "Arena lobby" << std::endl;
+		SendSwitchScene(j["arena-lobby"]);
+		break;
+	}
+	case 0x19:
+	{
+		std::cout << "Expert result" << std::endl;
+		SendSwitchScene(j["expert-result"]);
+		break;
+	}
+	case 0x18:
+	{
+		std::cout << "Expert select" << std::endl;
+		SendSwitchScene(j["expert-select"]);
+		break;
+	}
+	case 0x1F:
+	{
+		std::cout << "Gekisou racer" << std::endl;
+		break;
+	}
+	case 0xE:
+	{
+		std::cout << "Card out" << std::endl;
+		SendSwitchScene(j["card-out"]);
+		break;
+	}
+	case 0x17:
+	{
+		std::cout << "Dan result" << std::endl;
+		SendSwitchScene(j["dan-result"]);
+		break;
+	}
+	case 0x16:
+	{
+		std::cout << "Dan select" << std::endl;
+		SendSwitchScene(j["dan-select"]);
+		break;
+	}
+	case 0x1C:
+	{
+		std::cout << "Step up" << std::endl;
+		SendSwitchScene(j["music-select"]);
+		break;
+	}
+	case 0x43:
+	{
+		std::cout << "Test menu" << std::endl;
+		SendSwitchScene(j["test-menu"]);
+		break;
+	}
+	case 0x27:
+	{
+		std::cout << "Attract screen" << std::endl;
+		SendSwitchScene(j["attract-screen"]);
+		break;
+	}
+	case 0x26:
+	{
+		std::cout << "Title screen" << std::endl;
+		SendSwitchScene(j["title-screen"]);
+		break;
+	}
+	case 0xF:
+	{
+		std::cout << "Card in" << std::endl;
+		SendSwitchScene(j["card-in"]);
+		break;
+	}
+	case 0x11:
+	{
+		std::cout << "Mode select" << std::endl;
+		SendSwitchScene(j["mode-select"]);
+		break;
+	}
+	case 0x13:
+	{
+		std::cout << "DJVIP pass" << std::endl;
+		SendSwitchScene(j["djvip-pass-select"]);
+		break;
+	}
+	default:
+	{
+		std::cout << "sceneID: " << sceneID << std::endl;
+	}
+	}
 }
 
 void Hook28()
