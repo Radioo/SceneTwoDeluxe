@@ -14,3 +14,4 @@ The client will attempt to reconnect if a connection is lost.
 
 # Supported games
 IIDX28 (2021091500)
+SDVX6 (2021121400)
