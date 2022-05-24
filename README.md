@@ -17,4 +17,4 @@ The client will attempt to reconnect if a connection is lost.
 `IIDX28 (2021091500)`  
 `SDVX6 (2021121400)`  
 
-`SDVX6 コナステ (2022042600)`  
+`SDVX6 コナステ (2022042600)` - use [konasute_chainload](https://github.com/Radioo/konasute_chainload) for automatic injection
