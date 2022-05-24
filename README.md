@@ -13,5 +13,8 @@ You can see various debug messages in the cmd log if somehing goes wrong (will p
 The client will attempt to reconnect if a connection is lost.
 
 # Supported games
-IIDX28 (2021091500)
-SDVX6 (2021121400)
+`IIDX25 (2018091900)`  
+`IIDX28 (2021091500)`  
+`SDVX6 (2021121400)`  
+
+`SDVX6 コナステ (2022042600)`  
