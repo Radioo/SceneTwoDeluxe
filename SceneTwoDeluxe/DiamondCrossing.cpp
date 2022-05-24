@@ -250,21 +250,6 @@ void SceneSwitchSDVX6EAC(unsigned int sceneID)
 	}
 }
 
-void ParseJsonIIDX()
-{
-	try {
-		std::ifstream in("SceneTwoDeluxe.json");
-		in >> j;
-		in.close();
-		uri = j["obs-address"];
-		std::cout << "json dump: " << j.dump(4) << std::endl;
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "Error: " << e.what() << std::endl;
-	}
-}
-
 void Hook25()
 {
 	uintptr_t isDPAddr = 0x231B6E4;
