@@ -19,6 +19,10 @@ void Hook25();
 
 void SceneSwitch25(unsigned int sceneID);
 
+void Hook27();
+
+void SceneSwitch27(unsigned int sceneID);
+
 void Hook28();
 
 void SceneSwitch28(unsigned int sceneID);
