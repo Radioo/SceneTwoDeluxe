@@ -17,8 +17,9 @@ const short* IsDP = (short*)0x14241A894; // address of the byte that controls th
 
 DWORD WINAPI DecideVersion(LPVOID hModule)
 {
+    LPCWSTR modName = nullptr;
+    modName = GetCurrentModuleName();
     LPMODULEINFO mInfo = GetGameModuleInfo();
-
     if (mInfo == NULL)
     {
         std::cout << "module info is null" << std::endl;
@@ -32,11 +33,11 @@ DWORD WINAPI DecideVersion(LPVOID hModule)
         std::string version = GetGameVersion(mInfo);
         if (version == "NOT FOUND")
         {
-			std::cout << "Game version not found, retrying..." << std::endl;
+			std::cout << "Game version not found." << std::endl;
 		}
 		else
 		{
-            StartSceneHooks(version, mInfo);
+            StartSceneHooks(version, mInfo, modName);
         }
     }
     

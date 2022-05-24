@@ -8,35 +8,41 @@ bool* isDP;
 nlohmann::json j;
 std::string uri;
 
+LPCWSTR currentModuleName;
+
+void(*SceneSwitch)(unsigned int sceneID) = nullptr;
+
 char (__fastcall* OnSceneSwitch_origSDVX6)(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5) = nullptr;
 char __fastcall OnSceneSwitch_hookSDVX6(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5)
 {
-	SceneSwitchSDVX6(sceneID);
+	SceneSwitch(sceneID);
 	return OnSceneSwitch_origSDVX6(a1, sceneID, a3, a4, a5);
 }
 
 char (__fastcall* OnSceneSwitch_orig25)(void* a1, unsigned int sceneID, __int64 a3, char a4) = nullptr;
 char __fastcall OnSceneSwitch_hook25(void* a1, unsigned int sceneID, __int64 a3, char a4)
 {
-	SceneSwitch25(sceneID);
+	SceneSwitch(sceneID);
 	return OnSceneSwitch_orig25(a1, sceneID, a3, a4);
 }
 
 char(__fastcall* OnSceneSwitch_orig28)(void* a1, unsigned int sceneID, __int64 a3) = nullptr;
 char __fastcall OnSceneSwitch_hook28(void* a1, unsigned int sceneID, __int64 a3)
 {
-	SceneSwitch28(sceneID);
+	SceneSwitch(sceneID);
 	return OnSceneSwitch_orig28(a1, sceneID, a3);
 }
 
-void StartSceneHooks(std::string& version, LPMODULEINFO mInfo)
+void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName)
 {
+	currentModuleName = modName;
 	CurrentModuleInfo = mInfo;	
 	// IIDX28
 	if (version.substr(10,10) == "2021091500")
 	{
 		std::cout << "Found supported version: " << version << std::endl;
-		ParseJsonIIDX();
+		ParseJson("SceneTwoDeluxe.json");
+		SceneSwitch = &SceneSwitch28;
 		auto task = std::async(std::launch::async, RunServer, uri);
 		Hook28();
 	}
@@ -44,17 +50,28 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo)
 	else if (version.substr(10, 10) == "2018091900")
 	{
 		std::cout << "Found supported version: " << version << std::endl;
-		ParseJsonIIDX();
+		ParseJson("SceneTwoDeluxe.json");
+		SceneSwitch = &SceneSwitch25;
 		auto task = std::async(std::launch::async, RunServer, uri);
 		Hook25();
 	}
 	// SDVX6
 	else if (version.substr(10, 10) == "2021121400")
 	{
-		ParseJsonSDVX();
+		std::cout << "Found supported version: " << version << std::endl;
+		ParseJson("SceneTwoVoltex.json");
+		SceneSwitch = &SceneSwitchSDVX6;
 		auto task = std::async(std::launch::async, RunServer, uri);
 		HookVoltex6();
+	}
+	// SDVX eac QCV:J:B:A:2022042600
+	else if (version.substr(10, 10) == "2022042600")
+	{
 		std::cout << "Found supported version: " << version << std::endl;
+		ParseJson("SceneTwoVoltex.json");
+		SceneSwitch = &SceneSwitchSDVX6EAC;
+		auto task = std::async(std::launch::async, RunServer, uri);
+		HookVoltex6EAC();
 	}
 	else
 	{
@@ -62,18 +79,53 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo)
 	}
 }
 
-void ParseJsonSDVX()
+void ParseJson(const char* jsonName)
 {
-	std::ifstream in("SceneTwoVoltex.json");
-	in >> j;
-	in.close();
-	uri = j["obs-address"];
-	std::cout << "json dump: " << j.dump(4) << std::endl;
+	try {
+		// get current module location
+		LPWSTR curModDir = new WCHAR[MAX_PATH];
+		
+		GetModuleFileName((HMODULE)CurrentModuleInfo->lpBaseOfDll, curModDir, MAX_PATH);
+        
+		// compute relative path to json file
+		auto currentModuleNameLength = lstrlen(currentModuleName);
+		auto currentModulePathLength = lstrlen(curModDir);
+		
+		std::string jsonPath = std::string(CW2A(curModDir));
+		jsonPath.replace(currentModulePathLength - currentModuleNameLength, strlen(jsonName), jsonName);
+		
+		std::cout << "jsonPath: " << jsonPath << std::endl;
+		
+		std::ifstream in(jsonPath);
+		in >> j;
+		in.close();
+		uri = j["obs-address"];
+		std::cout << "json dump: " << j.dump(4) << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "Error: " << e.what() << std::endl;
+	}
 }
 
 void HookVoltex6()
 {
 	uintptr_t sceneSwitchFuncAddr = 0x43B950;
+	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
+
+	MH_CreateHook(
+		reinterpret_cast<void*>(addrAfterOffset),
+		reinterpret_cast<void*>(OnSceneSwitch_hookSDVX6),
+		reinterpret_cast<void**>(&OnSceneSwitch_origSDVX6)
+	);
+	MH_EnableHook(MH_ALL_HOOKS);
+
+	std::cout << "Hooks enabled" << std::endl;
+}
+
+void HookVoltex6EAC()
+{
+	uintptr_t sceneSwitchFuncAddr = 0x39F920;
 	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
 
 	MH_CreateHook(
@@ -140,18 +192,77 @@ void SceneSwitchSDVX6(unsigned int sceneID)
 	}
 	default:
 	{
-		std::cout << "SceneID: " << sceneID << std::endl;
+		std::cout << "SceneID: " << std::hex << sceneID << std::endl;
+	}
+	}
+}
+
+void SceneSwitchSDVX6EAC(unsigned int sceneID)
+{
+	switch (sceneID)
+	{
+	case 0x10:
+	{
+		std::cout << "Music select" << std::endl;
+		SendSwitchScene(j["music-select"]);
+		break;
+	}
+	case 0x29:
+	{
+		std::cout << "Stage scene" << std::endl;
+		SendSwitchScene(j["stage"]);
+		break;
+	}
+	case 0xE:
+	{
+		std::cout << "Result scene" << std::endl;
+		SendSwitchScene(j["result-screen"]);
+		break;
+	}
+	case 0xC:
+	{
+		std::cout << "Attract screen" << std::endl;
+		SendSwitchScene(j["attract-screen"]);
+		break;
+	}
+	case 0xB:
+	{
+		std::cout << "Title screen" << std::endl;
+		SendSwitchScene(j["title-screen"]);
+		break;
+	}
+	case 0x22:
+	{
+		std::cout << "Course select" << std::endl;
+		SendSwitchScene(j["course-select"]);
+		break;
+	}
+	case 0xF:
+	{
+		std::cout << "Course result" << std::endl;
+		SendSwitchScene(j["course-result"]);
+		break;
+	}
+	default:
+	{
+		std::cout << "SceneID: " << std::hex << sceneID << std::endl;
 	}
 	}
 }
 
 void ParseJsonIIDX()
 {
-	std::ifstream in("SceneTwoDeluxe.json");
-	in >> j;
-	in.close();
-	uri = j["obs-address"];
-	std::cout << "json dump: " << j.dump(4) << std::endl;
+	try {
+		std::ifstream in("SceneTwoDeluxe.json");
+		in >> j;
+		in.close();
+		uri = j["obs-address"];
+		std::cout << "json dump: " << j.dump(4) << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "Error: " << e.what() << std::endl;
+	}
 }
 
 void Hook25()
@@ -398,7 +509,7 @@ void SceneSwitch25(unsigned int sceneID)
 	}
 	default:
 	{
-		std::cout << "sceneID: " << sceneID << std::endl;
+		std::cout << "sceneID: " << std::hex << sceneID << std::endl;
 	}
 	}
 }

@@ -25,5 +25,7 @@
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 #include <nlohmann/json.hpp>
+#include <codecvt>
+#include <locale> 
 
 #endif //PCH_H

@@ -16,7 +16,7 @@ const std::vector<BYTE> DateCodeTemplate = { 0x2A, 0x2A, 0x2A, 0x3A, 0x2A, 0x3A,
 static std::regex const re{ R"([\w|\d][\w|\d][\w|\d][:][\w|\d][:][\w|\d][:][\w|\d][:]\d\d\d\d\d\d\d\d\d\d)", std::regex_constants::optimize };
 
 // Names of possible game modules
-const std::vector<LPCWSTR> GameModuleNames = { L"bm2dx.dll", L"bm2dx.exe", L"soundvoltex.dll"};
+const std::vector<LPCWSTR> GameModuleNames = { L"bm2dx.dll", L"bm2dx.exe", L"soundvoltex.dll", L"sv6c.exe"};
 
 HMODULE CurrentGameModule = NULL;
 LPCWSTR CurrentGameModuleName = NULL;
@@ -25,10 +25,9 @@ LPCWSTR CurrentGameModuleName = NULL;
 /// Gets a pointer to the game's MODULEINFO
 /// </summary>
 /// <returns></returns>
-LPMODULEINFO GetGameModuleInfo()
-{
-	LPMODULEINFO moduleInfo = new MODULEINFO();
 
+LPCWSTR GetCurrentModuleName()
+{
 	// Try to get module handle
 	HMODULE hModule = NULL;
 	for (LPCWSTR moduleName : GameModuleNames)
@@ -39,10 +38,10 @@ LPMODULEINFO GetGameModuleInfo()
 			CurrentGameModule = hModule;
 			CurrentGameModuleName = moduleName;
 			std::wcout << "Found game module: " << moduleName << std::endl;
-			break;
+			return moduleName;
 		}
 	}
-	
+
 	// If can't get module handle, output supported module names and return NULL
 	if (hModule == NULL)
 	{
@@ -56,11 +55,16 @@ LPMODULEINFO GetGameModuleInfo()
 		}
 		return NULL;
 	}
+}
+
+LPMODULEINFO GetGameModuleInfo()
+{
+	LPMODULEINFO moduleInfo = new MODULEINFO();
 	
 	// Try to get module info, return NULL if failed
 	if (moduleInfo != NULL)
 	{
-		if (GetModuleInformation(GetCurrentProcess(), hModule, moduleInfo, sizeof(MODULEINFO)))
+		if (GetModuleInformation(GetCurrentProcess(), CurrentGameModule, moduleInfo, sizeof(MODULEINFO)))
 		{
 			return moduleInfo;
 		}
@@ -88,6 +92,7 @@ std::string GetGameVersion(LPMODULEINFO mInfo)
 	}
 	else
 	{
+		std::cout << "No product information found, searching for date code..." << std::endl;
 		//std::cout << "Sanity check values" << std::endl;
 		//std::cout << mInfo->EntryPoint << std::endl;
 		//std::cout << mInfo->lpBaseOfDll << std::endl;
@@ -182,7 +187,7 @@ std::vector<LPCWSTR> GetProductVersion(const LPCWSTR filePath)
 
 	if (!GetFileVersionInfo(filePath, NULL, infoSize, buffer))
 	{
-		std::cout << "GetFileVersionInfo failed" << std::endl;
+		//std::cout << "GetFileVersionInfo failed" << std::endl;
 		return out;
 	}
 

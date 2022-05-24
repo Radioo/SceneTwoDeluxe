@@ -3,15 +3,17 @@
 
 char __fastcall OnSceneSwitch_hook28(void* a1, unsigned int sceneID, __int64 a3);
 
-void StartSceneHooks(std::string& version, LPMODULEINFO mInfo);
+void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName);
 
-void ParseJsonSDVX();
+void ParseJson(const char* jsonName);
 
 void HookVoltex6();
 
+void HookVoltex6EAC();
+
 void SceneSwitchSDVX6(unsigned int sceneID);
 
-void ParseJsonIIDX();
+void SceneSwitchSDVX6EAC(unsigned int sceneID);
 
 void Hook25();
 

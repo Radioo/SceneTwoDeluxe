@@ -21,9 +21,6 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SceneEnums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GetGameModuleInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
