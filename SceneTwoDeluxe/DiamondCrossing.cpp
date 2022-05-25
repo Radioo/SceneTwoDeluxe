@@ -73,6 +73,15 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName)
 		auto task = std::async(std::launch::async, RunServer, uri);
 		HookVoltex6();
 	}
+	// SDVX6 
+	else if (version.substr(10, 10) == "2022042500")
+	{
+		std::cout << "Found supported version: " << version << std::endl;
+		ParseJson("SceneTwoVoltex.json");
+		SceneSwitch = &SceneSwitchSDVX6_2022042500;
+		auto task = std::async(std::launch::async, RunServer, uri);
+		HookVoltex6_2022042500();
+	}
 	// SDVX eac QCV:J:B:A:2022042600
 	else if (version.substr(10, 10) == "2022042600")
 	{
@@ -120,6 +129,21 @@ void ParseJson(const char* jsonName)
 void HookVoltex6()
 {
 	uintptr_t sceneSwitchFuncAddr = 0x43B950;
+	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
+
+	MH_CreateHook(
+		reinterpret_cast<void*>(addrAfterOffset),
+		reinterpret_cast<void*>(OnSceneSwitch_hookSDVX6),
+		reinterpret_cast<void**>(&OnSceneSwitch_origSDVX6)
+	);
+	MH_EnableHook(MH_ALL_HOOKS);
+
+	std::cout << "Hooks enabled" << std::endl;
+}
+
+void HookVoltex6_2022042500()
+{
+	uintptr_t sceneSwitchFuncAddr = 0x484E40;
 	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
 
 	MH_CreateHook(
@@ -202,6 +226,65 @@ void SceneSwitchSDVX6(unsigned int sceneID)
 	default:
 	{
 		std::cout << "SceneID: " << std::hex << sceneID << std::endl;
+	}
+	}
+}
+
+void SceneSwitchSDVX6_2022042500(unsigned int sceneID)
+{
+	switch (sceneID)
+	{
+	case 0x12:
+	{
+		std::cout << "Music select scene" << std::endl;
+		SendSwitchScene(j["music-select"]);
+		break;
+	}
+	case 0x2C:
+	{
+		std::cout << "Stage scene" << std::endl;
+		SendSwitchScene(j["stage"]);
+		break;
+	}
+	case 0x10:
+	{
+		std::cout << "Result scene" << std::endl;
+		SendSwitchScene(j["result-screen"]);
+		break;
+	}
+	case 0x2E:
+	{
+		std::cout << "Test menu" << std::endl;
+		SendSwitchScene(j["test-menu"]);
+		break;
+	}
+	case 0x24:
+	{
+		std::cout << "Course select" << std::endl;
+		SendSwitchScene(j["course-select"]);
+		break;
+	}
+	case 0x11:
+	{
+		std::cout << "Course result" << std::endl;
+		SendSwitchScene(j["course-result"]);
+		break;
+	}
+	case 0xE:
+	{
+		std::cout << "Attract" << std::endl;
+		SendSwitchScene(j["attract-screen"]);
+		break;
+	}
+	case 0xD:
+	{
+		std::cout << "Title" << std::endl;
+		SendSwitchScene(j["title-screen"]);
+		break;
+	}
+	default:
+	{
+		std::cout << "sceneID: " << std::hex << sceneID << std::endl;
 	}
 	}
 }
