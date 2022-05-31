@@ -97,7 +97,7 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName)
 		std::cout << "Found supported version: " << version << std::endl;
 		ParseJson("SceneTwoVoltex.json");
 		SceneSwitch = &SceneSwitchSDVX6EAC;
-		//auto task = std::async(std::launch::async, RunServer, uri);
+		auto task = std::async(std::launch::async, RunServer, uri);
 		HookVoltex6EAC_2022053103();
 	}
 	else
