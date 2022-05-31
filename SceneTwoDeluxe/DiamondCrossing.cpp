@@ -91,6 +91,15 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName)
 		auto task = std::async(std::launch::async, RunServer, uri);
 		HookVoltex6EAC();
 	}
+	// SDVX eac QCV:J:B:A:2022053103
+	else if (version.substr(10, 10) == "2022053103")
+	{
+		std::cout << "Found supported version: " << version << std::endl;
+		ParseJson("SceneTwoVoltex.json");
+		SceneSwitch = &SceneSwitchSDVX6EAC;
+		//auto task = std::async(std::launch::async, RunServer, uri);
+		HookVoltex6EAC_2022053103();
+	}
 	else
 	{
 		std::cout << "Found unsupported version: " << version << std::endl;
@@ -159,6 +168,21 @@ void HookVoltex6_2022042500()
 void HookVoltex6EAC()
 {
 	uintptr_t sceneSwitchFuncAddr = 0x39F920;
+	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
+
+	MH_CreateHook(
+		reinterpret_cast<void*>(addrAfterOffset),
+		reinterpret_cast<void*>(OnSceneSwitch_hookSDVX6),
+		reinterpret_cast<void**>(&OnSceneSwitch_origSDVX6)
+	);
+	MH_EnableHook(MH_ALL_HOOKS);
+
+	std::cout << "Hooks enabled" << std::endl;
+}
+
+void HookVoltex6EAC_2022053103()
+{
+	uintptr_t sceneSwitchFuncAddr = 0x3BA460;
 	uintptr_t addrAfterOffset = (uintptr_t)CurrentModuleInfo->lpBaseOfDll + sceneSwitchFuncAddr;
 
 	MH_CreateHook(

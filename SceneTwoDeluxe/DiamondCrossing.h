@@ -13,6 +13,8 @@ void HookVoltex6_2022042500();
 
 void HookVoltex6EAC();
 
+void HookVoltex6EAC_2022053103();
+
 void SceneSwitchSDVX6(unsigned int sceneID);
 
 void SceneSwitchSDVX6_2022042500(unsigned int sceneID);
