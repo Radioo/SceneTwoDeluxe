@@ -21,11 +21,6 @@ const std::vector<LPCWSTR> GameModuleNames = { L"bm2dx.dll", L"bm2dx.exe", L"sou
 HMODULE CurrentGameModule = NULL;
 LPCWSTR CurrentGameModuleName = NULL;
 
-/// <summary>
-/// Gets a pointer to the game's MODULEINFO
-/// </summary>
-/// <returns></returns>
-
 LPCWSTR GetCurrentModuleName()
 {
 	// Try to get module handle
@@ -77,6 +72,7 @@ LPMODULEINFO GetGameModuleInfo()
 	}
 	else
 	{
+		std::cout << GetLastError() << std::endl;
 		return NULL;
 	}
 }
@@ -93,87 +89,18 @@ std::string GetGameVersion(LPMODULEINFO mInfo)
 	else
 	{
 		std::cout << "No product information found, searching for date code..." << std::endl;
-		//std::cout << "Sanity check values" << std::endl;
-		//std::cout << mInfo->EntryPoint << std::endl;
-		//std::cout << mInfo->lpBaseOfDll << std::endl;
-		//std::cout << std::hex << mInfo->SizeOfImage << std::endl;
 
 		const char* beg = (char*)mInfo->lpBaseOfDll;
 		const char* end = beg + mInfo->SizeOfImage;
-		std::cout << "searching" << std::endl;
 		std::cmatch m;
-		/*
-		if (!std::regex_search(beg, end, m, re))
-		{
-			return "NOT FOUND";	
-		}
-		*/
+
 		while (!std::regex_search(beg, end, m, re))
 		{
 			std::cout << "Searching for game version..." << std::endl;
 			std::this_thread::sleep_for(std::chrono::seconds(5));
 		}
-		std::cout << "Found version string: " << std::hex << (uintptr_t)m[0].first << std::endl;
+		//std::cout << "Found version string: " << std::hex << (uintptr_t)m[0].first << std::endl;
 		return m[0].first;
-		
-		
-		/* The file thing
-		LPWSTR fileName = new WCHAR[MAX_PATH];
-
-		GetModuleFileName(CurrentGameModule, fileName, MAX_PATH);
-
-		// open the file:
-		std::ifstream file(fileName, std::ios::binary);
-
-		// Stop eating new lines in binary mode!!!
-		file.unsetf(std::ios::skipws);
-
-		// get its size:
-		std::streampos fileSize;
-
-		file.seekg(0, std::ios::end);
-		fileSize = file.tellg();
-		file.seekg(0, std::ios::beg);
-
-		// reserve capacity
-		std::vector<BYTE> vec;
-		vec.reserve(fileSize);
-
-		// read the data:
-		vec.insert(vec.begin(),
-			std::istream_iterator<BYTE>(file),
-			std::istream_iterator<BYTE>());
-
-		auto result = std::search(vec.begin(), vec.end(), DateCodeTemplate.begin(), DateCodeTemplate.end());
-		std::vector<ptrdiff_t> matches;
-		if (result != vec.end())
-		{
-			matches.push_back(std::distance(vec.begin(), result));
-			result += 1;
-
-			while (result != vec.end())
-			{
-				result = std::search(result, vec.end(), DateCodeTemplate.begin(), DateCodeTemplate.end());
-
-				if (result != vec.end())
-				{
-					matches.push_back(std::distance(vec.begin(), result));
-					result += 1;
-				}
-			}
-		}
-		if (matches.size() == 0)
-		{
-			std::cout << "No version templates found in the module" << std::endl;
-		}
-		else
-		{
-			uintptr_t DateCodePtr = (uintptr_t)mInfo->lpBaseOfDll + matches[matches.size()-1];
-			std::cout << "Date code ptr: " << std::hex << DateCodePtr << std::endl;
-			return std::string((char*)DateCodePtr);
-		}
-		std::cout << "matches count: " << matches.size() << std::endl;
-		*/
 	}
 	return "NOT FOUND";
 }

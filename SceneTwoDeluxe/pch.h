@@ -27,5 +27,7 @@
 #include <nlohmann/json.hpp>
 #include <codecvt>
 #include <locale> 
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 #endif //PCH_H
