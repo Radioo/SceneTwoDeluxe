@@ -14,6 +14,7 @@ The client will attempt to reconnect if a connection is lost.
 
 ## Supported games
 `IIDX25 (2018091900)`  
+`IIDX27 (2020092900)`  
 `IIDX28 (2021091500)` 
   
 `SDVX6 (2021121400)`  
