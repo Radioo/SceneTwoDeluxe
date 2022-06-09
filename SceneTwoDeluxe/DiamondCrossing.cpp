@@ -30,7 +30,7 @@ char __fastcall OnSceneSwitch_hook28(void* a1, unsigned int sceneID, __int64 a3)
 }
 
 // works for SDVX: 2021121400, 2022042500, 2022052400, 2022060700
-// works for SDVXEAC: 2022042600, 2022053103
+// works for SDVXEAC: 2022042600, 2022053103, 2022060801
 char(__fastcall* OnSceneSwitch_origSDVX6)(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5) = nullptr;
 char __fastcall OnSceneSwitch_hookSDVX6(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5)
 {
@@ -135,6 +135,15 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName, 
 		EnableHookSDVX(0x3BA460, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
 	}
 	
+	// SDVX eac QCV:J:B:A:2022060801
+	else if (version.substr(10, 10) == "2022060801")
+	{
+		std::cout << "Found supported version: " << version << std::endl;
+		SceneSwitch = &SceneSwitchSDVXEAC_2022042600;
+		auto task = std::async(std::launch::async, RunServer, uri);
+		EnableHookSDVX(0x3BAA00, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
+	}
+
 	else
 	{
 		std::cout << "Found unsupported version: " << version << std::endl;
@@ -1024,7 +1033,7 @@ void SceneSwitchSDVX_2022052400(unsigned int sceneID)
 	}
 }
 
-// also works for: 2022053103
+// also works for: 2022053103, 2022060801
 void SceneSwitchSDVXEAC_2022042600(unsigned int sceneID)
 {
 	switch (sceneID)
