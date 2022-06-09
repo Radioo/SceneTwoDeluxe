@@ -20,6 +20,7 @@ The client will attempt to reconnect if a connection is lost.
 `SDVX6 (2021121400)`  
 `SDVX6 (2022042500)`  
 `SDVX6 (2022052400)`  
+`SDVX6 (2022060700)`  
 
 `SDVX6 コナステ (2022042600)`  
 `SDVX6 コナステ (2022053103)`  
