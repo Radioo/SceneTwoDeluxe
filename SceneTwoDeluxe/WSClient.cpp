@@ -18,6 +18,7 @@ void on_open(websocketpp::connection_hdl hdl) {
 	CurrentConnection = hdl;
 	isConnected = true;
 	std::cout << "Connection opened" << std::endl;
+	Identify();
 }
 
 void on_close(websocketpp::connection_hdl hdl) {
@@ -90,12 +91,35 @@ void PerformSend(std::string sceneName)
 		if (sceneName != "")
 		{
 			nlohmann::json js;
-			js["request-type"] = "SetCurrentScene";
-			js["message-id"] = std::to_string(++currentMsg);
-			js["scene-name"] = sceneName;
+			js["op"] =  6;
+
+			nlohmann::json jsreq;
+			jsreq["requestType"] = "SetCurrentProgramScene";
+			jsreq["requestId"] = std::to_string(++currentMsg);
+
+			nlohmann::json jsreqdata;
+			jsreqdata["sceneName"] = sceneName;
+
+			jsreq["requestData"] = jsreqdata;
+			js["d"] = jsreq;
 
 			c.send(CurrentConnection, js.dump(), websocketpp::frame::opcode::text);
 		}
+	}
+}
+
+void Identify() {
+	if (isConnected) {
+		nlohmann::json jmain;
+		jmain["op"] = 1;
+
+		nlohmann::json j;
+		j["rpcVersion"] = 1;
+		// todo implement auth
+
+		jmain["d"] = j;
+
+		c.send(CurrentConnection, jmain.dump(), websocketpp::frame::opcode::text);
 	}
 }
 
@@ -105,6 +129,34 @@ void PerformSendWithDelay(std::string sceneName, std::string delayMs)
 	{
 		if (sceneName != "")
 		{
+			nlohmann::json jmain;
+			jmain["op"] = 8;
+
+			nlohmann::json jd;
+			jd["requestType"] = "RequestBatch";
+			jd["requestId"] = std::to_string(++currentMsg);
+			jd["executionType"] = 0;
+
+			nlohmann::json jsleep;
+			jsleep["requestType"] = "Sleep";
+			jsleep["requestId"] = std::to_string(++currentMsg);
+
+			nlohmann::json jsleepdata;
+			jsleepdata["sleepMillis"] = std::stoi(delayMs);
+			jsleep["requestData"] = jsleepdata;
+			
+			nlohmann::json jsscene;
+			jsscene["requestType"] = "SetCurrentProgramScene";
+			jsscene["requestId"] = std::to_string(++currentMsg);
+
+			nlohmann::json jsscenedata;
+			jsscenedata["sceneName"] = sceneName;
+			jsscene["requestData"] = jsscenedata;
+
+			jd["requests"] = { jsleep, jsscene };
+			jmain["d"] = jd;
+
+			/*
 			nlohmann::json jss;
 			jss["request-type"] = "Sleep";
 			jss["message-id"] = std::to_string(++currentMsg);
@@ -119,8 +171,10 @@ void PerformSendWithDelay(std::string sceneName, std::string delayMs)
 			js["request-type"] = "ExecuteBatch";
 			js["message-id"] = std::to_string(++currentMsg);
 			js["requests"] = { jss, jsc };
+			*/
 
-			c.send(CurrentConnection, js.dump(), websocketpp::frame::opcode::text);
+			//std::cout << jmain.dump(4) << std::endl;
+			c.send(CurrentConnection, jmain.dump(), websocketpp::frame::opcode::text);
 		}
 	}
 }
