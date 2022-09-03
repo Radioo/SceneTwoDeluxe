@@ -2,7 +2,6 @@
 Automatic OBS scene switcher for IIDX and SDVX.
 
 ## Usage
-Install https://github.com/obsproject/obs-websocket (version 4.x.x).  
 Disable obs websocket authentication: Tools -> WebSockets Server Settings (I can implement it if people really need it, but just couldn't be bothered this time).  
 Extract `SceneTwoDeluxe.dll` and `SceneTwoDeluxe.ini` to your game's directory.  
 Edit the `.ini` to configure behavior:  
