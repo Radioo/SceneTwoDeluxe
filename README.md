@@ -15,6 +15,8 @@ The client will attempt to reconnect if a connection is lost.
 `IIDX25 (2018091900)`  
 `IIDX27 (2020092900)`  
 `IIDX28 (2021091500)` 
+
+`IIDX INFINITAS (2022072700)`  
   
 `SDVX6 (2021121400)`  
 `SDVX6 (2022042500)`  
