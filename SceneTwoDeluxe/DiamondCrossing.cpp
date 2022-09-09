@@ -81,6 +81,14 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName, 
 		EnableHookIIDX(0x782E80, 0x50A11C4, OnSceneSwitch_hook28, &OnSceneSwitch_orig28);
 	}
 
+	// IIDX P2D:J:B:A:2022072700
+	else if (version.substr(10, 10) == "2022072700") {
+		std::cout << "Found supported version: " << version << std::endl;
+		SceneSwitch = &SceneSwitchIIDXINF_2022072700;
+		auto task = std::async(std::launch::async, RunServer, uri);
+		EnableHookIIDX(0x1A55D0, 0x1A431A0, OnSceneSwitch_hook25, &OnSceneSwitch_orig25);
+	}
+
 	// SDVX6 2021121400
 	else if (version.substr(10, 10) == "2021121400")
 	{
@@ -188,6 +196,9 @@ void EnableHookSDVX(uintptr_t sceneSwitchAddr, void* onSceneSwitchHook, void* On
 	std::cout << "Hooks enabled" << std::endl;
 }
 
+void SceneSwitchDebug(unsigned int sceneID) {
+	std::cout << sceneID << std::endl;
+}
 
 void SceneSwitchIIDX_2018091900(unsigned int sceneID)
 {
@@ -863,6 +874,59 @@ void SceneSwitchIIDX_2021091500(unsigned int sceneID)
 	
 }
 
+void SceneSwitchIIDXINF_2022072700(unsigned int sceneID) {
+	switch (sceneID) {
+	case 17:
+	{
+		std::cout << "Music select" << std::endl;
+		SendSwitchScene(sM[Scene::IIDX_MUSIC_SELECT]);
+		break;
+	}
+	case 26:
+	{
+		if (*isDP) {
+			std::cout << "DP stage" << std::endl;
+			SendSwitchScene(sM[Scene::IIDX_DP_STAGE]);
+			break;
+		}
+		else {
+			std::cout << "SP stage" << std::endl;
+			SendSwitchScene(sM[Scene::IIDX_SP_STAGE]);
+			break;
+		}
+	}
+	case 11:
+	{
+		std::cout << "Result" << std::endl;
+		SendSwitchScene(sM[Scene::IIDX_RESULT]);
+		break;
+	}
+	case 24:
+	{
+		if (*isDP) {
+			std::cout << "DP dan stage" << std::endl;
+			SendSwitchScene(sM[Scene::IIDX_DP_STAGE]);
+			break;
+		}
+		else {
+			std::cout << "SP dan stage" << std::endl;
+			SendSwitchScene(sM[Scene::IIDX_SP_STAGE]);
+			break;
+		}
+	}
+	case 10:
+	{
+		std::cout << "Dan result" << std::endl;
+		SendSwitchScene(sM[Scene::IIDX_DAN_RESULT]);
+		break;
+	}
+	default:
+	{
+		std::cout << "Unused scene: " << sceneID << std::endl;
+	}
+	}
+}
+
 
 void SceneSwitchSDVX_2021121400(unsigned int sceneID)
 {
@@ -1042,7 +1106,7 @@ void SceneSwitchSDVX_2022052400(unsigned int sceneID)
 	}
 }
 
-// also works for: 2022053103, 2022060801
+// also works for: 2022053103, 2022060801, 2022082400
 void SceneSwitchSDVXEAC_2022042600(unsigned int sceneID)
 {
 	switch (sceneID)

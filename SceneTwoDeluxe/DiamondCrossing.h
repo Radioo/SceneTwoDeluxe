@@ -12,11 +12,15 @@ void EnableHookIIDX(uintptr_t sceneSwitchAddr, uintptr_t isDPAddr, void* onScene
 
 void EnableHookSDVX(uintptr_t sceneSwitchAddr, void* onSceneSwitchHook, void* OnSceneSwitchOrig);
 
+void SceneSwitchDebug(unsigned int sceneID);
+
 void SceneSwitchIIDX_2018091900(unsigned int sceneID);
 
 void SceneSwitchIIDX_2020092900(unsigned int sceneID);
 
 void SceneSwitchIIDX_2021091500(unsigned int sceneID);
+
+void SceneSwitchIIDXINF_2022072700(unsigned int sceneID);
 
 void SceneSwitchSDVX_2021121400(unsigned int sceneID);
 
