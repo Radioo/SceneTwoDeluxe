@@ -30,7 +30,7 @@ char __fastcall OnSceneSwitch_hook28(void* a1, unsigned int sceneID, __int64 a3)
 }
 
 // works for SDVX: 2021121400, 2022042500, 2022052400, 2022060700
-// works for SDVXEAC: 2022042600, 2022053103, 2022060801
+// works for SDVXEAC: 2022042600, 2022053103, 2022060801, 2022091400
 char(__fastcall* OnSceneSwitch_origSDVX6)(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5) = nullptr;
 char __fastcall OnSceneSwitch_hookSDVX6(void* a1, unsigned int sceneID, __int64 a3, char a4, char a5)
 {
@@ -124,6 +124,15 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName, 
 		auto task = std::async(std::launch::async, RunServer, uri);
 		EnableHookSDVX(0x48CAD0, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
 	}
+
+	// SDVX6 KFC:J:F:A:2022091300
+	else if (version.substr(10, 10) == "2022091300")
+	{
+		std::cout << "Found supported version: " << version << std::endl;
+		SceneSwitch = &SceneSwitchSDVX_2022052400;
+		auto task = std::async(std::launch::async, RunServer, uri);
+		EnableHookSDVX(0x4DB320, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
+	}
 	
 	// SDVX eac QCV:J:B:A:2022042600
 	else if (version.substr(10, 10) == "2022042600")
@@ -159,6 +168,15 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName, 
 		SceneSwitch = &SceneSwitchSDVXEAC_2022042600;
 		auto task = std::async(std::launch::async, RunServer, uri);
 		EnableHookSDVX(0x3BFD50, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
+	}
+
+	// SDVX eac QCV:J:B:A:2022091400
+	else if (version == "QCV:J:B:A:2022091400")
+	{
+	std::cout << "Found supported version: " << version << std::endl;
+	SceneSwitch = &SceneSwitchSDVXEAC_2022042600;
+	auto task = std::async(std::launch::async, RunServer, uri);
+	EnableHookSDVX(0x3C0A70, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
 	}
 
 	else
