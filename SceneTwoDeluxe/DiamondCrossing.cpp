@@ -134,6 +134,15 @@ void StartSceneHooks(std::string& version, LPMODULEINFO mInfo, LPCWSTR modName, 
 		EnableHookSDVX(0x4DB320, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
 	}
 	
+	// SDVX6 KFC:J:F:A:2022100400
+	else if (version.substr(10, 10) == "2022100400")
+	{
+		std::cout << "Found supported version: " << version << std::endl;
+		SceneSwitch = &SceneSwitchSDVX_2022052400;
+		auto task = std::async(std::launch::async, RunServer, uri);
+		EnableHookSDVX(0x4DB320, OnSceneSwitch_hookSDVX6, &OnSceneSwitch_origSDVX6);
+	}
+
 	// SDVX eac QCV:J:B:A:2022042600
 	else if (version.substr(10, 10) == "2022042600")
 	{
